@@ -10,20 +10,20 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
+
         if cls is None:
             return self.__objects
+
         cls_name = cls.__name__
-        dct = {}
+        cls_objects = {}
         for key in self.__objects.keys():
-            if key.split('.')[0] == cls_name:
-                dct[key] = self.__objects[key]
-        return dct
+            if cls_name == key.split('.')[0]:
+                cls_objects[key] = self.__objects[key]
+        return cls_objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
-        self.__objects.update(
-            {obj.to_dict()['__class__'] + '.' + obj.id: obj}
-            )
+        self.__objects.update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
 
     def save(self):
         """Saves storage dictionary to file"""
@@ -32,6 +32,7 @@ class FileStorage:
             temp.update(self.__objects)
             for key, val in temp.items():
                 temp[key] = val.to_dict()
+                temp[key].pop('_sa_instance_state', None)
             json.dump(temp, f)
 
     def reload(self):
@@ -59,15 +60,16 @@ class FileStorage:
             pass
 
     def delete(self, obj=None):
-        """Deletes the object obj from athe attr
-        __objects if its inside it
-        """
+        """Deletes an object from __objects if it exists."""
+
         if obj is None:
             return
-        obj_key = obj.to_dict()['__class__'] + '.' + obj.id
-        if obj_key in self.__objects.keys():
-            del self.__objects[obj_key]
+
+        key = obj.to_dict()['__class__'] + '.' + obj.id
+        if key in self.__objects.keys():
+            del self.__objects[key]
 
     def close(self):
-        """Call the reload method"""
+        """Deserializes the JSON file into objects"""
+
         self.reload()
