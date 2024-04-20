@@ -12,7 +12,7 @@ app = Flask(__name__)
 def hello():
     """Returns a welcome string"""
 
-    return render_template("100-hbnb.html")
+    return 'Hello HBNB!'
 
 
 if __name__ == '__main__':
